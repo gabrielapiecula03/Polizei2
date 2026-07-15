@@ -3,10 +3,12 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 5f;
+    public float speed = 7f;
 
     private CharacterController controller;
     private Vector2 moveInput;
+
+    public Vector2 lookInput;
 
     private Animator animator;
 
@@ -14,25 +16,39 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
-        
     }
 
-   public void OnMove(InputValue value)
-{
-    moveInput = value.Get<Vector2>();
-}
+    public void OnMove(InputValue value)
+    {
+        moveInput = value.Get<Vector2>();
+    }
+
+    public void OnLook(InputValue value)
+    {
+        lookInput = value.Get<Vector2>();
+    }
 
     void Update()
     {
-        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
+        Vector3 forward = Camera.main.transform.forward;
+        Vector3 right = Camera.main.transform.right;
+
+        forward.y = 0;
+        right.y = 0;
+
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 move = forward * moveInput.y + right * moveInput.x;
 
         controller.Move(move * speed * Time.deltaTime);
 
         if (move != Vector3.zero)
-{
-    transform.rotation = Quaternion.LookRotation(move);
-}
-     float movementSpeed = move.magnitude;
-     animator.SetFloat("Speed", movementSpeed);
+        {
+            transform.rotation = Quaternion.LookRotation(move);
+        }
+
+        float movementSpeed = moveInput.magnitude;
+        animator.SetFloat("Speed", movementSpeed);
     }
 }
