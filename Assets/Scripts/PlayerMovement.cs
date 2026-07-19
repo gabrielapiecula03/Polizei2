@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
 
     private CatInteraction nearbyCat;
+    private NpcDialogue nearbyNpc;
 
 
     void Start()
@@ -33,13 +34,19 @@ public class PlayerMovement : MonoBehaviour
         lookInput = value.Get<Vector2>();
     }
 
-public void OnInteract(InputValue value)
-{
-    if (nearbyCat != null)
+
+    public void OnInteract(InputValue value)
     {
-        nearbyCat.Interact();
+        if (nearbyCat != null)
+        {
+            nearbyCat.Interact();
+        }
+
+        if (nearbyNpc != null)
+        {
+            nearbyNpc.Interact();
+        }
     }
-}
 
 
     private void OnTriggerEnter(Collider other)
@@ -49,6 +56,14 @@ public void OnInteract(InputValue value)
         if (cat != null)
         {
             nearbyCat = cat;
+        }
+
+
+        NpcDialogue npc = other.GetComponent<NpcDialogue>();
+
+        if (npc != null)
+        {
+            nearbyNpc = npc;
         }
     }
 
@@ -60,6 +75,14 @@ public void OnInteract(InputValue value)
         if (cat == nearbyCat)
         {
             nearbyCat = null;
+        }
+
+
+        NpcDialogue npc = other.GetComponent<NpcDialogue>();
+
+        if (npc == nearbyNpc)
+        {
+            nearbyNpc = null;
         }
     }
 
