@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
 
     private CatInteraction nearbyCat;
     private NpcDialogue nearbyNpc;
+    private CanPickup nearbyCan;
 
 
     void Start()
@@ -46,6 +47,11 @@ public class PlayerMovement : MonoBehaviour
         {
             nearbyNpc.Interact();
         }
+
+        if (nearbyCan != null)
+        {
+            nearbyCan.Interact();
+        }
     }
 
 
@@ -65,6 +71,14 @@ public class PlayerMovement : MonoBehaviour
         {
             nearbyNpc = npc;
         }
+
+
+        CanPickup can = other.GetComponent<CanPickup>();
+
+        if (can != null)
+        {
+            nearbyCan = can;
+        }
     }
 
 
@@ -83,6 +97,14 @@ public class PlayerMovement : MonoBehaviour
         if (npc == nearbyNpc)
         {
             nearbyNpc = null;
+        }
+
+
+        CanPickup can = other.GetComponent<CanPickup>();
+
+        if (can == nearbyCan)
+        {
+            nearbyCan = null;
         }
     }
 

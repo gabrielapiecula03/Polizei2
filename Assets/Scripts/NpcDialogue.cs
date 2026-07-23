@@ -10,6 +10,8 @@ public class NpcDialogue : MonoBehaviour
     public TMP_Text speakerText;
     public TMP_Text dialogueText;
 
+    public CanCounterUI canCounterUI;
+
     public DialogueLine[] dialogueLines;
 
     public float typingSpeed = 0.03f;
@@ -107,24 +109,24 @@ public class NpcDialogue : MonoBehaviour
 
 
     void ShowLine()
-{
-    string speaker = dialogueLines[currentLine].speaker;
-
-    speakerText.text = speaker;
-
-
-    if (speaker == "YOU")
     {
-        speakerText.color = Color.cyan;
-    }
-    else if (speaker == "NPC")
-    {
-        speakerText.color = Color.yellow;
-    }
+        string speaker = dialogueLines[currentLine].speaker;
+
+        speakerText.text = speaker;
 
 
-    typingCoroutine = StartCoroutine(TypeLine(dialogueLines[currentLine].text));
-}
+        if (speaker == "YOU")
+        {
+            speakerText.color = Color.cyan;
+        }
+        else if (speaker == "NPC")
+        {
+            speakerText.color = Color.yellow;
+        }
+
+
+        typingCoroutine = StartCoroutine(TypeLine(dialogueLines[currentLine].text));
+    }
 
 
     IEnumerator TypeLine(string line)
@@ -151,5 +153,11 @@ public class NpcDialogue : MonoBehaviour
         dialogueBox.SetActive(false);
 
         currentLine = 0;
+
+
+        if (canCounterUI != null)
+        {
+            canCounterUI.ShowCounter();
+        }
     }
 }
