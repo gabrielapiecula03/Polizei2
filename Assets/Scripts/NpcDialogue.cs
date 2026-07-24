@@ -12,7 +12,12 @@ public class NpcDialogue : MonoBehaviour
 
     public CanCounterUI canCounterUI;
 
-    public DialogueLine[] dialogueLines;
+    public GameObject winScreen;
+
+    public ParticleSystem winParticles;
+
+    public DialogueLine[] questDialogueLines;
+    public DialogueLine[] finishDialogueLines;
 
     public float typingSpeed = 0.03f;
 
@@ -22,13 +27,35 @@ public class NpcDialogue : MonoBehaviour
     private int currentLine = 0;
     private bool isTyping = false;
 
+    private bool showingFinishDialogue = false;
+
     private Coroutine typingCoroutine;
+
+
+    private void Awake()
+    {
+        if (winParticles != null)
+        {
+            var main = winParticles.main;
+            main.useUnscaledTime = true;
+        }
+    }
 
 
     void Start()
     {
         interactText.SetActive(false);
         dialogueBox.SetActive(false);
+
+        if (winScreen != null)
+        {
+            winScreen.SetActive(false);
+        }
+
+        if (winParticles != null)
+        {
+            winParticles.Stop();
+        }
     }
 
 
@@ -61,6 +88,15 @@ public class NpcDialogue : MonoBehaviour
     {
         if (!dialogueActive)
         {
+            if (QuestManager.Instance.HasEnoughCans())
+            {
+                showingFinishDialogue = true;
+            }
+            else
+            {
+                showingFinishDialogue = false;
+            }
+
             StartDialogue();
         }
         else
@@ -89,7 +125,14 @@ public class NpcDialogue : MonoBehaviour
         {
             StopCoroutine(typingCoroutine);
 
-            dialogueText.text = dialogueLines[currentLine].text;
+            if (showingFinishDialogue)
+            {
+                dialogueText.text = finishDialogueLines[currentLine].text;
+            }
+            else
+            {
+                dialogueText.text = questDialogueLines[currentLine].text;
+            }
 
             isTyping = false;
             return;
@@ -98,11 +141,24 @@ public class NpcDialogue : MonoBehaviour
 
         currentLine++;
 
-        if (currentLine >= dialogueLines.Length)
+
+        if (showingFinishDialogue)
         {
-            EndDialogue();
-            return;
+            if (currentLine >= finishDialogueLines.Length)
+            {
+                EndDialogue();
+                return;
+            }
         }
+        else
+        {
+            if (currentLine >= questDialogueLines.Length)
+            {
+                EndDialogue();
+                return;
+            }
+        }
+
 
         ShowLine();
     }
@@ -110,22 +166,33 @@ public class NpcDialogue : MonoBehaviour
 
     void ShowLine()
     {
-        string speaker = dialogueLines[currentLine].speaker;
-
-        speakerText.text = speaker;
+        DialogueLine line;
 
 
-        if (speaker == "YOU")
+        if (showingFinishDialogue)
+        {
+            line = finishDialogueLines[currentLine];
+        }
+        else
+        {
+            line = questDialogueLines[currentLine];
+        }
+
+
+        speakerText.text = line.speaker;
+
+
+        if (line.speaker == "YOU")
         {
             speakerText.color = Color.cyan;
         }
-        else if (speaker == "NPC")
+        else if (line.speaker == "NPC")
         {
             speakerText.color = Color.yellow;
         }
 
 
-        typingCoroutine = StartCoroutine(TypeLine(dialogueLines[currentLine].text));
+        typingCoroutine = StartCoroutine(TypeLine(line.text));
     }
 
 
@@ -135,12 +202,14 @@ public class NpcDialogue : MonoBehaviour
 
         dialogueText.text = "";
 
+
         foreach (char letter in line)
         {
             dialogueText.text += letter;
 
-            yield return new WaitForSeconds(typingSpeed);
+            yield return new WaitForSecondsRealtime(typingSpeed);
         }
+
 
         isTyping = false;
     }
@@ -155,9 +224,28 @@ public class NpcDialogue : MonoBehaviour
         currentLine = 0;
 
 
-        if (canCounterUI != null)
+        if (showingFinishDialogue)
         {
-            canCounterUI.ShowCounter();
+            if (winScreen != null)
+            {
+                winScreen.SetActive(true);
+            }
+
+
+            if (winParticles != null)
+            {
+                winParticles.Play();
+            }
+
+
+            //Time.timeScale = 0f;
+        }
+        else
+        {
+            if (canCounterUI != null)
+            {
+                canCounterUI.ShowCounter();
+            }
         }
     }
 }
